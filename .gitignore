@@ -1,0 +1,9 @@
+venv
+__pycache__
+English/__pycache__
+English/db.sqlite3
+English/English/__pycache__
+English/user/__pycache__
+English/api/__pycache__
+.idea
+.env
