@@ -23,8 +23,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # apps:
     "api",
+    "users",
 
     # libraries:
+    "rest_framework",
     "drf_yasg",
 
 ]
@@ -105,3 +107,6 @@ STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+AUTH_USER_MODEL = "users.User"

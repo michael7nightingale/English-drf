@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'docs/', include(docs_urlpatterns)),
     path(r"api/v1/", include("api.urls")),
+    path(r"", include("users.urls")),
 
 
 ]
