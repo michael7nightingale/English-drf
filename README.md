@@ -4,11 +4,12 @@
 
 .env file (fill with your ones):
 ```text
-DB_NAME=db-name
-DB_HOST=db-host
-DB_POST=db-port
-DB_USER=db-user
-DB_PASSWORD=db-password
+DB_NAME=...
+DB_HOST=...
+DB_POST=...
+DB_USER=...
+DB_PASSWORD=...
+OPENAI_KEY=..
 ```
 
 Install python requirements:
@@ -17,7 +18,7 @@ Install python requirements:
 pip install -r requirements.txt
 ```
 
-Run django test server:
+Run django`s test server:
 
 ```commandline
 cd English
@@ -25,5 +26,3 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver
 ```
-
-
