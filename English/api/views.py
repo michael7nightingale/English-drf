@@ -36,6 +36,8 @@ class MessageViewSet(viewsets.ModelViewSet):
             url_path='send', url_name="send")
     def send(self, request):
         text = request.data.get('text')
+        if text is None:
+            return Response({"detail":  "text is not provided"})
         message = Message.objects.create(text=text, user=request.user)
         messenger = Messenger(message)
         messenger.chat()

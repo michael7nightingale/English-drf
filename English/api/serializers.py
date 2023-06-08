@@ -4,7 +4,7 @@ from .models import Message
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    user = serializers.CurrentUserDefault()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Message

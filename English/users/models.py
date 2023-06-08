@@ -16,6 +16,11 @@ class User(AbstractUser):
     avatar = models.ImageField("Avatar", upload_to=AVATARS_DIR, default=load_default_avatar)
     level = models.CharField("Уровень английского", max_length=100, default='A1', blank=True)
 
+    USERNAME_FIELD = 'username'
+    EMAIL_FIELD = "email"
+
+    REQUIRED_FIELDS = ("email", 'password', 'location')
+
     @classmethod
     def register(cls, **data):
         psw = data.get('password')
