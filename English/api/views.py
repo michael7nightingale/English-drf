@@ -37,10 +37,30 @@ class MessageViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False,
             url_path='send', url_name="send")
     def send(self, request):
-        text = request.data.get('text')
-        if text is None:
+        data = {
+            "text": request.data.get("text"),
+            "type": request.data.get("type"),
+            "reply_to": request.data.get("reply_to"),
+            "user": request.user
+        }
+        print(data)
+        if data['reply_to']:
+            try:
+                message_to_reply = Message.objects.get(id=int(data['reply_to']))
+                data['reply_to'] = message_to_reply
+                message_type = message_to_reply.type
+                if data['type'] != "pupil":
+                    return Response({"detail": "Unexpected mode"})
+                else:
+                    if message_type != data['type']:
+                        return Response({"detail": "Not right message to reply"})
+            except:
+                return Response({"detail": "Message to reply is not found"})
+        else:
+            data["reply_to"] = None
+        if data['text'] is None:
             return Response({"detail":  "text is not provided"})
-        message = Message.objects.create(text=text, user=request.user)
+        message = Message.objects.create(**data)
         messenger = Messenger(message)
         messenger.chat()
         return Response({"detail": "message was sent"}, status=status.HTTP_200_OK)

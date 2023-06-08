@@ -10,6 +10,7 @@ import sys
 
 sys.path.append('d:/Progs/PycharmProjects/English/English')
 from api.models import Message
+from .tasks import get_response
 
 
 pool = ThreadPool()
@@ -66,15 +67,12 @@ class ChatGPT(MessengerBase):
 
     @staticmethod
     def get_response(text: str) -> str:
-        result = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": text}]
-        )
-        return result.choices[0].message.content
+        return get_response(text)
 
 
 class Messenger(ChatGPT):
     __slots__ = ('message', 'func')
+    user = ChatGTPUser
 
     def __init__(self, message: Message):
         super().__init__()
@@ -108,7 +106,7 @@ class Messenger(ChatGPT):
         return text.strip()
 
     def __reply_to_pupil(self) -> str:
-        original_message = self.message.reply_to.reply_to
+        original_message = self.message.reply_to
         text = \
         f"""
             Помоги мне усовершенствовать свой уровень английского языка. 

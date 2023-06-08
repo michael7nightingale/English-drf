@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     "drf_yasg",
     "rest_framework.authtoken",
     "djoser",
+    "celery",
+    'redis',
 
 ]
 
@@ -173,3 +175,8 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+
+
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+

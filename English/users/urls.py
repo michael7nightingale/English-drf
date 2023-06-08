@@ -6,7 +6,7 @@ from .views import *
 
 
 router = DefaultRouter()
-# router.register("users", UserViewSet, basename='users')
+router.register("users", UserViewSet, basename='users')
 
 
 urlpatterns = [
