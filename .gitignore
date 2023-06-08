@@ -8,5 +8,5 @@ English/api/__pycache__
 .idea
 .env
 essay.md
-
+db.sqlite3
 

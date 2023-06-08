@@ -1,14 +1,15 @@
+from django.forms import model_to_dict
 from rest_framework import views, viewsets, generics, mixins
 from rest_framework import authentication, permissions, status
 from rest_framework.decorators import action
 from rest_framework.renderers import JSONRenderer
 from django.contrib.auth import get_user_model
-
-from .models import Message
-from .serializers import MessageSerializer
-from ai.messenger import Messenger
-
 from rest_framework.response import Response
+
+from .models import Message, Category, Word
+from .paginators import MessagesListPaginator
+from .serializers import MessageSerializer, CategorySerializer, WordSerializer
+from ai.messenger import Messenger
 
 
 User = get_user_model()
@@ -24,6 +25,7 @@ class IndexAPIView(views.APIView):
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     queryset = Message.objects.all()
+    pagination_class = MessagesListPaginator
 
     def get_permissions(self):
         if self.action in ('send', "generate", None):
@@ -55,6 +57,50 @@ class MessageViewSet(viewsets.ModelViewSet):
         return self.list(request, *args, **kwargs)
 
 
+class CategoryListAPIView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    def list(self, request):
+        data = self.queryset.values()
+        for q, d in zip(self.queryset.all(), data):
+            d['url'] = q.get_absolute_url()
+            d['count'] = q.count()
+        serializer = self.serializer_class(data=list(data), many=True)
+        serializer.is_valid(raise_exception=True)
+        return Response({"categories": serializer.validated_data})
 
 
+class CategoryDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = CategorySerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        category_name = kwargs.get('category_name')
+        if category_name is None:
+            return Response({"detail": "missing category name"})
+        try:
+
+            instance = Category.objects.get(title=category_name)
+            data = model_to_dict(instance)
+            data['count'] = instance.count()
+            serializer = self.serializer_class(data=data, many=False)
+            serializer.is_valid(raise_exception=True)
+            return Response({'category': serializer.validated_data})
+
+        except Exception as e:
+            print(e)
+            return Response({"detail": "category is not found"})
+
+
+class WordsListAPIView(generics.ListAPIView):
+    queryset = Word.objects.all()
+    serializer_class = WordSerializer
+
+    def list(self, request, *args, **kwargs):
+        category_name = kwargs.get("category_name")
+        if category_name is None:
+            return Response({"detail": "category name is required"})
+
+        words = self.queryset.filter(category__title=category_name)
+        serializer = self.serializer_class(instance=words, many=True)
+        return Response({"words": serializer.data})
