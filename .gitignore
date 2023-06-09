@@ -8,5 +8,7 @@ English/api/__pycache__
 .idea
 .env
 essay.md
-
-
+db.sqlite3
+.dockerignore
+docker-compose.yaml
+Dockerfile

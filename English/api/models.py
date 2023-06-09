@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Category(models.Model):
@@ -6,6 +7,12 @@ class Category(models.Model):
 
     def count(self):
         return Word.objects.filter(category=self).count()
+
+    def get_absolute_url(self):
+        return reverse("category_detail", kwargs={"category_name": self.title})
+
+    def __str__(self):
+        return self.title
 
 
 class Word(models.Model):
@@ -23,6 +30,7 @@ class BaseTextMessage(models.Model):
 
 
 class Message(BaseTextMessage):
+    NO_REPLY_TYPE = "remark"
 
     class TypeChoices(models.TextChoices):
         remark = ("remark", "Remark")
