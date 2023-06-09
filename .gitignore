@@ -9,4 +9,6 @@ English/api/__pycache__
 .env
 essay.md
 db.sqlite3
-
+.dockerignore
+docker-compose.yaml
+Dockerfile

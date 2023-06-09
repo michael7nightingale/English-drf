@@ -5,6 +5,7 @@ from .models import Message, Category, Word
 
 class MessageSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    type = serializers.HiddenField(default=Message.NO_REPLY_TYPE)
 
     class Meta:
         model = Message

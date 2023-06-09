@@ -1,0 +1,9 @@
+venv
+db.sqlite3
+.git
+.gitignore
+.README.md
+essay.md
+requirements.txt
+.env
+.idea

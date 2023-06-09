@@ -30,6 +30,7 @@ class BaseTextMessage(models.Model):
 
 
 class Message(BaseTextMessage):
+    NO_REPLY_TYPE = "remark"
 
     class TypeChoices(models.TextChoices):
         remark = ("remark", "Remark")

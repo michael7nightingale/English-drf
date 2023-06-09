@@ -11,3 +11,4 @@ def get_response(text: str):
         messages=[{"role": "user", "content": text}]
     )
     return result.choices[0].message.content
+

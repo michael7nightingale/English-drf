@@ -1,10 +1,11 @@
 from django.forms import model_to_dict
-from rest_framework import views, viewsets, generics, mixins
+from rest_framework import views, viewsets, generics
 from rest_framework import authentication, permissions, status
 from rest_framework.decorators import action
 from rest_framework.renderers import JSONRenderer
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
+import logging
 
 from .models import Message, Category, Word
 from .paginators import MessagesListPaginator
@@ -12,6 +13,7 @@ from .serializers import MessageSerializer, CategorySerializer, WordSerializer
 from ai.messenger import Messenger
 
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -37,27 +39,28 @@ class MessageViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False,
             url_path='send', url_name="send")
     def send(self, request):
+
         data = {
             "text": request.data.get("text"),
-            "type": request.data.get("type"),
+            # "type": request.data.get("type"),
             "reply_to": request.data.get("reply_to"),
             "user": request.user
         }
-        print(data)
         if data['reply_to']:
             try:
                 message_to_reply = Message.objects.get(id=int(data['reply_to']))
                 data['reply_to'] = message_to_reply
                 message_type = message_to_reply.type
-                if data['type'] != "pupil":
-                    return Response({"detail": "Unexpected mode"})
+                if message_type in ("pupil", "image"):
+                    data['type'] = message_type
                 else:
-                    if message_type != data['type']:
-                        return Response({"detail": "Not right message to reply"})
-            except:
+                    return Response({"detail": "unsupported type to reply"})
+            except Exception as e:
+                logger.error(e)
                 return Response({"detail": "Message to reply is not found"})
         else:
             data["reply_to"] = None
+            data['type'] = Message.NO_REPLY_TYPE
         if data['text'] is None:
             return Response({"detail":  "text is not provided"})
         message = Message.objects.create(**data)
@@ -108,7 +111,7 @@ class CategoryDetailAPIView(generics.RetrieveAPIView):
             return Response({'category': serializer.validated_data})
 
         except Exception as e:
-            print(e)
+            logger.error(e)
             return Response({"detail": "category is not found"})
 
 
