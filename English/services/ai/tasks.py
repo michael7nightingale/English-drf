@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from api.models import Message
+from chats.models import Message
 import openai
 
 
@@ -11,4 +11,3 @@ def get_response(text: str):
         messages=[{"role": "user", "content": text}]
     )
     return result.choices[0].message.content
-

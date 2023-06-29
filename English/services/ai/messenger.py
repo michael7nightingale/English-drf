@@ -1,18 +1,16 @@
 import os
 import re
 from typing import Any
-from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError, OperationalError
 import openai
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
-import sys
 
 from openai.error import AuthenticationError
 
-sys.path.append('d:/Progs/PycharmProjects/English/English')
-from api.models import Message
+from users.models import Account
+from chats.models import Message
 from .tasks import get_response
 
 
@@ -35,24 +33,23 @@ ChatGTPUser = None
 
 def create_gpt_user() -> None:
     global ChatGTPUser
-    ChatGTPUser = get_user_model().objects.create(
-        username='chat-gpt',
-        password='chat-gpt-password',
+    ChatGTPUser = Account.objects.create_account(
+        dict(username='chat-gpt', password='chat-gpt-password', email='chat_gpt@mail.ru',),
         location='New York',
         level='C2',
-        email='chat_gpt@mail.ru',
-        score=6000,
+
     )
+    ChatGTPUser.score = 6000
+    ChatGTPUser.save()
 
 
 try:
     create_gpt_user()
 except IntegrityError:  # instance exists, it`s OK
-    ChatGTPUser = get_user_model().objects.get(username='chat-gpt')
+    ChatGTPUser = Account.objects.get(user__username='chat-gpt')
     # ChatGTPUser.delete()
     # create_gpt_user()
 except OperationalError as error:
-    print(str(error))
     print("Need migrations")
 
 

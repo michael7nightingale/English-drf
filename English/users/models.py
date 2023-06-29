@@ -1,12 +1,10 @@
-from django.core.files import File
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from passlib.hash import django_pbkdf2_sha256
+from django.contrib.auth.models import User
+from django.conf import settings
 import logging
 
 
 logger = logging.getLogger(__name__)
-AVATARS_DIR = "media/avatars/"
 
 SCORES = {
     1000: "A1",
@@ -18,12 +16,24 @@ SCORES = {
 }
 
 
-def load_default_avatar():
-    logger.debug(str(File(AVATARS_DIR + "/default_avatar.png")))
-    return File(AVATARS_DIR + "/default_avatar.png")
+class AccountManager(models.Manager):
+    def create_account(self,
+                       user: dict,
+                       location: str,
+                       avatar=None,
+                       level: str | None = None):
+        """Create instance and hash password"""
+        user = User.objects.create_user(**user)
+        account = Account.objects.create(
+            location=location,
+            avatar=avatar,
+            level=level,
+            user=user
+        )
+        return account
 
 
-class User(AbstractUser):
+class Account(models.Model):
 
     class Levels(models.TextChoices):
         A1 = ("A1", "(А1) – начальный")
@@ -33,37 +43,14 @@ class User(AbstractUser):
         C1 = ("C1", "(C1) – продвинутый")
         C2 = ("C2", "(C2) – профессиональный уровень владения")
 
+    user = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
     location = models.CharField("Location", max_length=200)
-    avatar = models.ImageField("Avatar", upload_to=AVATARS_DIR, default=load_default_avatar)
+    avatar = models.ImageField("Avatar", upload_to='uploads/avatars/', null=True, blank=True)
     level = models.CharField("Уровень английского", max_length=100, default='A1', blank=True)
     score = models.IntegerField("Очки английского", null=True, default=0, blank=True)
     # need_exam = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = "email"
-    REQUIRED_FIELDS = ("email", 'password', 'location')
-
-    @classmethod
-    def register(cls, **data):
-        """Create instance and hash password"""
-        psw = data.get('password')
-        if psw is not None:
-            hash_psw = django_pbkdf2_sha256.hash(psw)
-            data.update(password=hash_psw)
-            user = cls.objects.create(**data)
-            user.save()
-            return user
-
-        return None
-
-    @classmethod
-    def login(cls, username: str, password: str):
-        """Verify user password hash"""
-        user = cls.objects.get(username=username)
-        if django_pbkdf2_sha256.verify(password, user.password):
-            return user
-
-        return None
+    objects = AccountManager()
 
     def add_score(self, score: int) -> None:
         """Adding some scores to instance`s score."""
@@ -76,7 +63,10 @@ class User(AbstractUser):
         else:
             pass    # some mistake
 
+    def get_avatar_url(self):
+        if self.avatar is None:
+            return settings.MEDIA_URL + "/uploads/avatars/default.png"
+        return settings.MEDIA_URL + self.avatar.url
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-
-

@@ -1,21 +1,14 @@
-from django.urls import path
-from rest_framework.routers import DefaultRouter
+from django.urls import path, include
 
-from .views import MessageViewSet, IndexAPIView, CategoryListAPIView, CategoryDetailAPIView
-from .views import WordsListAPIView
-
-
-router = DefaultRouter()
-router.register('messages', MessageViewSet, basename='messages')
+from .docs import urlpatterns as docs_urlpatterns
+from .views import IndexAPIView
 
 
 urlpatterns = [
-    path('index/', IndexAPIView.as_view(), name='index'),
-    path("categories/", CategoryListAPIView.as_view(), name='category_list'),
-    path("categories/<str:category_name>", CategoryDetailAPIView.as_view(), name='category_detail'),
-    path("words/<str:category_name>", WordsListAPIView.as_view(), name="words_list"),
+    path("docs/", include(docs_urlpatterns)),
+    path('', IndexAPIView.as_view(), name='index'),
+    path("categories/", include("words.urls")),
+    path("auth/", include("users.urls")),
+    path("messages/", include("chats.urls"))
 
 ]
-
-urlpatterns += router.urls
-
