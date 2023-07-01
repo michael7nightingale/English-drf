@@ -46,7 +46,7 @@ except IntegrityError:  # instance exists, it`s OK
     # ChatGTPUser.delete()
     # create_gpt_user()
 except OperationalError as error:
-    print("Need migrations")
+    print(f"Need migrations: {error}")
 
 
 class MessengerBase(ABC):
@@ -58,7 +58,7 @@ class MessengerBase(ABC):
     @staticmethod
     def __test_chat() -> None:
         message = "It`s just a test, you may answer with a single dot like `.`"
-        response = openai.ChatCompletion.create(
+        openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": message}]
         )
@@ -114,27 +114,28 @@ class Messenger(ChatGPT):
         return None
 
     def __reply_to_remark(self) -> str:
-        text = \
+        text = (
             f"""
                 Побудь моим учителем английского и редактором сообщения.
                 Вот мой текст: {self.message.text}
                 Исправь в нем ошибки и объясни, в чём я ошибся. Если я всё сделал правильно, то похвали.
-                В конце сообщения напиши в скобках единственное число от 0 до 10 - объективная оценка моего сообщения на 
+                В конце сообщения напиши в скобках единственное число от 0 до 10 - объективная оценка моего сообщения на
                 уровень владения конкретно английским языком, например: (5). Оцени белеберду в 0 баллов.
-            """
+        """)
         return text.strip().replace('\n', ' ')
 
     def __reply_to_pupil(self) -> str:
         original_message = self.message.reply_to
-        text = \
+        text = (
             f"""
                 Побудь моим учителем английского и редактором сообщения.
                 Я должен был перевести на английский язык этот текст: {original_message.text}.
                 Вот мой перевод: {self.message.text}
-                Исправь в нем ошибки и объясни, в чём я ошибся. 
-                Если я всё сделал правильно, то не похвали. В конце сообщения напиши в скобках единственное число от 0 до 10 - объективная 
+                Исправь в нем ошибки и объясни, в чём я ошибся.
+                Если я всё сделал правильно, то не похвали.
+                В конце сообщения напиши в скобках единственное число от 0 до 10 - объективная
                 оценка моего перевода.
-            """
+        """)
         return text.strip().replace('\n', ' ')
 
     def save_answer(self, text: str) -> Message:
@@ -151,11 +152,13 @@ class Messenger(ChatGPT):
 
     @classmethod
     def generate(cls, chat):
-        request_text = \
-            f"""
+        request_text = (
+            """
             Напиши мне любое предложение или пару предложений на русском, которые я должен
             буду перевести на английский.
             """
+        )
+
         response_text = cls.get_response(request_text)
         new_message = Message.objects.create(
             text=response_text,

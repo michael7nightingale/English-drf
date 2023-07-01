@@ -2,8 +2,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import permissions, status, generics
 
-from .serializers import MessageListSerializer, MessageDetailSerializer, ChatRetrieveSerializer
-from .models import Message
+from .serializers import MessageDetailSerializer, ChatRetrieveSerializer
 from services.ai.messenger import Messenger
 
 

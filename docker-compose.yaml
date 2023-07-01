@@ -1,6 +1,13 @@
 version: "3"
 
 services:
+  redis:
+    image: redis:5
+    ports:
+      - 6379:6379
+    volumes:
+      - .:/django_app
+      -
   application:
     build: .
     container_name: "application"
@@ -14,6 +21,9 @@ services:
       - DJANGO_SUPERUSER_EMAIL=admin@example.com
     volumes:
       - .:/django_app
+    depends_on:
+      - redis
+
   gunicorn:
     image: hh_migrate
     container_name: "gunicorn"
@@ -26,4 +36,3 @@ services:
       - 80:80
     depends_on:
       - application
-

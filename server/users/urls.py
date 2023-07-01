@@ -17,9 +17,7 @@ urlpatterns = [
             path("token/verify/", TokenVerifyView.as_view(), name='token_verify')
         ]
     )),
-    # path("", include(router.urls)),
-    # path("accounts/<str:username>/", AccountDetailAPIView.as_view(), name='accounts_detail'),
+    path("", include(router.urls)),
+    path("accounts/<str:username>/", AccountDetailAPIView.as_view(), name='accounts_detail'),
 
 ]
-
-urlpatterns += router.urls

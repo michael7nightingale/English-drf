@@ -3,7 +3,7 @@ from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer
 import redis
 
-from services.ai.messenger import Messenger, MessageData
+from services.ai.messenger import Messenger
 from .models import Chat, Message
 
 

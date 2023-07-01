@@ -26,6 +26,3 @@ class ChatRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = ("chat_gpt_account", "account", "messages")
-
-
-
