@@ -35,5 +35,13 @@ class AccountDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ('username', 'first_name', 'last_name', "email", "password",
+        fields = ('username', 'first_name', 'last_name', "email"
                   'location', "get_avatar_url", "score", "level")
+
+
+class AccountShortDetailSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="account.user.username")
+
+    class Meta:
+        model = Account
+        fields = ("username", )

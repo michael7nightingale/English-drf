@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import logging
 
+from chats.models import Chat
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,11 @@ class AccountManager(models.Manager):
             avatar=avatar,
             level=level,
             user=user
+        )
+        chat_gpt_account = Account.objects.get(user__username='chat-gpt')
+        Chat.objects.create(
+            accout=account,
+            chat_gpt_account=chat_gpt_account
         )
         return account
 

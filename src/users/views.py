@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins, permissions
+from rest_framework import viewsets, mixins, permissions, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -49,3 +49,10 @@ class AccountViewSet(mixins.CreateModelMixin,
         serializer.is_valid(raise_exception=True)
         serializer.update(request.user.account, serializer.validated_data)
         return Response(serializer.validated_data)
+
+
+class AccountDetailAPIView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AccountDetailSerializer
+    lookup_url_kwarg = "username"
+    lookup_field = "user__username"

@@ -9,6 +9,6 @@ urlpatterns = [
     path('', IndexAPIView.as_view(), name='index'),
     path("categories/", include("words.urls")),
     path("auth/", include("users.urls")),
-    path("messages/", include("chats.urls"))
+    path("chats/", include("chats.urls"))
 
 ]

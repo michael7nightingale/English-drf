@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  application:
+    build: .
+    container_name: "application"
+    command:
+      - python manage.py makemigrations
+      - python manage.py migrate
+      - python manage.py createsuperuser --noinput
+    environment:
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_PASSWORD=password
+      - DJANGO_SUPERUSER_EMAIL=admin@example.com
+    volumes:
+      - .:/django_app
+  gunicorn:
+    image: hh_migrate
+    container_name: "gunicorn"
+    restart: always
+    command:
+      - python -m gunicorn -b 0.0.0.0:80 core.wsgi --reload
+    volumes:
+      - .:/django_app
+    ports:
+      - 80:80
+    depends_on:
+      - application
+
