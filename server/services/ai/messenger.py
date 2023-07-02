@@ -43,8 +43,6 @@ try:
     create_gpt_user()
 except IntegrityError:  # instance exists, it`s OK
     ChatGTPUser = Account.objects.get(user__username='chat-gpt')
-    # ChatGTPUser.delete()
-    # create_gpt_user()
 except OperationalError as error:
     print(f"Need migrations: {error}")
 
