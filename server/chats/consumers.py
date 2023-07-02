@@ -1,17 +1,9 @@
 import json
-from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer
-import redis
+from django.core.cache import cache
 
 from services.ai.messenger import Messenger
 from .models import Chat, Message
-
-
-redis_connection = redis.StrictRedis(
-    host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT,
-    db=0
-)
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -49,7 +41,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if text == "Generate":
             await self.generate_pupil_message()
         else:
-            last_message_json = redis_connection.get(str(self.account.id))
+            last_message_json = cache.get(self.account.id)
             last_message = json.loads(last_message_json)
             if last_message is None:
                 await self.answer_remark_message(text)
@@ -63,8 +55,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def generate_pupil_message(self):
         new_message = Messenger.generate(self.chat)
-        redis_connection.set(
-            str(self.account.id),
+        cache.set(
+            self.account.id,
             {"text": new_message.text, "type": new_message.type}
         )
         await self.send(text_data=json.dumps({'text': new_message.text}))
@@ -80,7 +72,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         pupil_answer_message = Messenger(new_message).chat()
         await self.send(text_data=json.dumps({'text': pupil_answer_message.text}))
-        redis_connection.set(str(self.account.id), None)
+        cache.set(self.account.id, None)
 
     async def answer_remark_message(self, text):
         new_message = Message.objects.create(
