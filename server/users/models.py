@@ -1,21 +1,26 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.conf import settings
 import logging
 
+from services.models import UUIDModel
 from chats.models import Chat
 
 
 logger = logging.getLogger(__name__)
 
-SCORES = {
-    1000: "A1",
-    2000: "A2",
-    3000: "B1",
-    4000: "B2",
-    5000: "C1",
-    6000: "C2"
-}
+
+class CustomUserManager(UserManager):
+    def get(self, *args, **kwargs):
+        return (
+            super()
+            .select_related("account")
+            .get(*args, **kwargs)
+        )
+
+
+class User(AbstractUser, UUIDModel):
+    objects = CustomUserManager()
 
 
 class AccountManager(models.Manager):
@@ -26,6 +31,8 @@ class AccountManager(models.Manager):
             avatar=None,
     ):
         user = User.objects.create_user(**user)
+        user.is_active = False    # for email activation
+        user.save()
         account = Account.objects.create(
             location=location,
             avatar=avatar,
@@ -34,7 +41,7 @@ class AccountManager(models.Manager):
         account.save()
         # chat_gpt_account = Account.objects.get(user__username='chat-gpt')
         Chat.objects.create(
-            accout=account,
+            account=account,
         )
         return account
 
@@ -60,7 +67,17 @@ class AccountManager(models.Manager):
         return account
 
 
-class Account(models.Model):
+SCORES = {
+    1000: "A1",
+    2000: "A2",
+    3000: "B1",
+    4000: "B2",
+    5000: "C1",
+    6000: "C2"
+}
+
+
+class Account(UUIDModel):
 
     class Levels(models.TextChoices):
         A1 = ("A1", "(А1) – начальный")

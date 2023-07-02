@@ -1,9 +1,9 @@
 from django.db import models
-from uuid import uuid4
+
+from services.models import UUIDModel
 
 
-class Chat(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4)
+class Chat(UUIDModel):
     account = models.OneToOneField("users.Account", on_delete=models.CASCADE, related_name="chat")
 
     objects = models.Manager()
