@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView, TokenObtainPairView
 
-from .views import AccountViewSet, AccountDetailAPIView
+from .views import AccountViewSet, AccountDetailAPIView, activate_user
 from .routers import AccountRouter
 
 
@@ -19,5 +19,6 @@ urlpatterns = [
     )),
     path("", include(router.urls)),
     path("accounts/<str:username>/", AccountDetailAPIView.as_view(), name='accounts_detail'),
+    path("auth/<str:uid>/<str:token>/", activate_user, name='activate_user'),
 
 ]

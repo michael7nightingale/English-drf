@@ -1,9 +1,10 @@
 from rest_framework import viewsets, mixins, permissions, generics
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 
-from .models import Account
+from .models import Account, User
 from .serializers import AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer
+from .service.email import send_email, check_activation_token, decode_uid
 
 
 class AccountViewSet(mixins.CreateModelMixin,
@@ -22,11 +23,11 @@ class AccountViewSet(mixins.CreateModelMixin,
 
     def create(self, request, *args, **kwargs):
         """Create both user and account."""
-        print(request.data)
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         new_account = Account.objects.create_account(**request.data)
-        return Response(AccountDetailSerializer(new_account).data, status=201)
+        message = send_email(request=request, user=new_account.user, user_email=new_account.user.email)
+        return Response(message, status=201)
 
     @action(methods=['get'], detail=False)
     def me(self, request):
@@ -57,3 +58,19 @@ class AccountDetailAPIView(generics.RetrieveAPIView):
     serializer_class = AccountDetailSerializer
     lookup_url_kwarg = "username"
     lookup_field = "user__username"
+
+
+@api_view(['get'])
+def activate_user(request, uid: str, token: str):
+    try:
+        print(User.objects.all().last().pk, decode_uid(uid))
+        user = User.objects.get(pk=decode_uid(uid))
+    except ():
+        user = None
+
+    if user is not None and check_activation_token(user=user, token=token):
+        user.is_active = True
+        user.save()
+        return Response("Registration is finished successfully.")
+    else:
+        return Response("Activation link is invalid.", status=400)

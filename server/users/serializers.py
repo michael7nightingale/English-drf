@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
 
-from .models import Account
+from .models import Account, User
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -28,10 +27,10 @@ class AccountCreateSerializer(serializers.ModelSerializer):
 
 
 class AccountDetailSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source="account.user.username")
-    first_name = serializers.CharField(source="account.user.first_name")
-    last_name = serializers.CharField(source="account.user.last_name")
-    email = serializers.CharField(source="account.user.email")
+    username = serializers.CharField(source="user.username")
+    first_name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
+    email = serializers.CharField(source="user.email")
 
     class Meta:
         model = Account
