@@ -231,6 +231,12 @@ CACHES = {
 
 TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
 
+
+# Celery Settings
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+
+
 # Email backend
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv("EMAIL_HOST")
