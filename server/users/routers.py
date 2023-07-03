@@ -4,7 +4,7 @@ from rest_framework import routers
 class AccountRouter(routers.DefaultRouter):
     routes = [
         routers.Route(
-            url="^{prefix}$",
+            url="^{prefix}{trailing_slash}$",
             mapping={
                 "get": "list",
                 "post": "create",
@@ -16,7 +16,7 @@ class AccountRouter(routers.DefaultRouter):
             initkwargs={"suffix": "List"}
         ),
         routers.DynamicRoute(
-            url=r"^{prefix}/{url_path}$",
+            url=r"^{prefix}/{url_path}{trailing_slash}$",
             name="{basename}__{url_name}",
             detail=True,
             initkwargs={}
