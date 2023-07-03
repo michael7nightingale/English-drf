@@ -24,6 +24,17 @@ JWT_SECRET_KEY=asquwru1rpkq0-p2jdiwnjhwe
 # redis settings
 REDIS_HOST=localhost
 REDIS_PORT=6379
+
+# Emailing settings
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_FROM=suslanchikm1opl123@gmail.com
+EMAIL_HOST_USER=suslan1chikmopl123@gmail.com
+EMAIL_HOST_PASSWORD=pbkkplplrkhpyimz
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+
+PASSWORD_RESET_TIMEOUT=14400
 ```
 
 ### 2) Python requirements.
@@ -35,10 +46,21 @@ Install python requirements using the terminal:
 pip install -r requirements.txt
 ```
 
-Run django`s test server:
 
-### 3) Django server.
+### 3) Redis and celery.
 
+Run `redis` in terminal with docker.
+```commandline
+docker run -d -p 6379:6379 redis:5
+```
+
+Run `celery` in terminal with python (command is specialized for `Windows`).
+```commandline
+python -m celery --app core worker -l info -P solo
+```
+
+### 4) Django server.
+Run django test server:
 ```commandline
 cd English
 python manage.py makemigrations
@@ -46,16 +68,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-These commands may be useful:
-```commandline
-python manage.py createsuperuser
-Username: ...admin...
-Email: ...Enter...
-Password: ...password...
-Password (Again): ...password...
-```
-
-### 4) Tests and linters
+### 5) Tests and linters
 I use `flake8` as a liner.
 ```commandline
 flake8
