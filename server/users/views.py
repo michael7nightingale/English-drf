@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from .models import Account, User
 from .serializers import AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer
-from .service.email import send_email, check_activation_token, decode_uid
+from .service.email import check_activation_token, decode_uid, send_email
 
 
 class AccountViewSet(mixins.CreateModelMixin,
@@ -26,7 +26,15 @@ class AccountViewSet(mixins.CreateModelMixin,
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         new_account = Account.objects.create_account(**request.data)
-        message = send_email(request=request, user=new_account.user, user_email=new_account.user.email)
+        send_email(
+            request=request,
+            user=new_account.user,
+            user_email=new_account.user.email
+        )
+        message = (
+            f"{new_account.user.username}! Please, check your email {new_account.user.email} and follow the link"
+            "in the message we have send you to finish the registration."
+        )
         return Response(message, status=201)
 
     @action(methods=['get'], detail=False)

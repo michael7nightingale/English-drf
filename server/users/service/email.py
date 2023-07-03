@@ -3,8 +3,9 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_str, force_bytes
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
 import six
+
+from ..tasks import send_email_task
 
 
 class ActivationUserTokenGenerator(PasswordResetTokenGenerator):
@@ -34,14 +35,9 @@ def send_email(request, user, user_email):
             "token": get_activation_token(user)
         }
     )
-    message = EmailMessage(subject=message_subject, body=message_content, to=[user_email])
-    if message.send():
-        return (
-            f"{user.username}! Please, check your email {user_email} and follow the link"
-            "in the message we have send you to finish the registration."
-        )
-    else:
-        return "Could not send message with the link(((."
+    send_email_task.apply_async(
+        args=[message_subject, message_content, user_email]
+    )
 
 
 def decode_uid(uid: str):
