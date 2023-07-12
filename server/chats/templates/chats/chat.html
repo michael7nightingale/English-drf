@@ -5,9 +5,11 @@
     <title>Chat Rooms</title>
 </head>
 <body>
-    What chat room would you like to enter?<br>
-    <input id="room-name-input" type="text" size="100"><br>
-    <input id="room-name-submit" type="button" value="Enter">
+    <label for="username-input">Username:</label>
+    <input id="username-input" type="text" name='username' size="100">
+    <label for="password-input">Password:</label>
+    <input id="password-input" type="text" name='password' size="100">
+    <button id="submit-button" type="button" value="Enter">a</button>
 
     <script src="{% static 'chats/js/chat.js' %}"></script>
 </body>
