@@ -20,6 +20,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # Application definition
 INSTALLED_APPS = [
+    "daphne",
     # django utils
     "django.contrib.admin",
     "django.contrib.auth",
@@ -70,6 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
+ASGI_APPLICATION = "core.asgi.application"
 
 
 # Database
@@ -227,6 +229,16 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
+}
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
+        },
+    },
 }
 
 TIME_FORMAT = r"%Y-%m-%d %H:%M:%S.%f %z"
