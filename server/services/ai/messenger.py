@@ -122,11 +122,11 @@ class Messenger(ChatGPT):
         """)
         return text.strip().replace('\n', ' ')
 
-    def __reply_to_pupil(self, original_message) -> str:
+    def __reply_to_pupil(self, original_message: dict) -> str:
         text = (
             f"""
                 Побудь моим учителем английского и редактором сообщения.
-                Я должен был перевести на английский язык этот текст: {original_message.text}.
+                Я должен был перевести на английский язык этот текст: {original_message['text']}.
                 Вот мой перевод: {self.message.text}
                 Исправь в нем ошибки и объясни, в чём я ошибся.
                 Если я всё сделал правильно, то не похвали.
