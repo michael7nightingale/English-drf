@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import permissions, status, generics
@@ -25,3 +26,11 @@ class ChatAPIView(generics.RetrieveAPIView):
         # messages = Message.objects.filter(chat=chat)
         serializer = self.serializer_class(insatance=chat, many=True)
         return Response(serializer.data)
+
+
+def chat_view(request):
+    return render(request, "chats/chat.html")
+
+
+def room_view(request):
+    return render(request, "chats/room.html")
