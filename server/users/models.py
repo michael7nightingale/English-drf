@@ -10,7 +10,7 @@ class CustomUserManager(UserManager):
     def get(self, *args, **kwargs):
         return (
             super()
-            .select_related("account")
+            .select_related("account", "account__chat")
             .get(*args, **kwargs)
         )
 
@@ -20,6 +20,12 @@ class User(AbstractUser, UUIDModel):
 
 
 class AccountManager(models.Manager):
+    def get(self, *args, **kwargs):
+        return super().select_related("user", "chat").get(*args, **kwargs)
+
+    def all(self):
+        return super().select_related("user", "chat").filter(user__is_active=True).all()
+
     def create_account(
             self,
             user: dict,
@@ -35,7 +41,6 @@ class AccountManager(models.Manager):
             user=user
         )
         account.save()
-        # chat_gpt_account = Account.objects.get(user__username='chat-gpt')
         Chat.objects.create(
             account=account,
         )
@@ -63,9 +68,6 @@ class AccountManager(models.Manager):
         )
         account.save()
         return account
-
-    def all(self):
-        return super().select_related("user").filter(user__is_active=True).all()
 
 
 SCORES = {
