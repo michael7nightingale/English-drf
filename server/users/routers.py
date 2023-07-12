@@ -17,8 +17,8 @@ class AccountRouter(routers.DefaultRouter):
         ),
         routers.DynamicRoute(
             url=r"^{prefix}/{url_path}{trailing_slash}$",
-            name="{basename}__{url_name}",
-            detail=True,
+            name="{basename}_{url_name}",
+            detail=False,
             initkwargs={}
         )
     ]

@@ -1,6 +1,7 @@
 from rest_framework import viewsets, mixins, permissions, generics
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+from http import HTTPStatus
 
 from .models import Account, User
 from .serializers import AccountCreateSerializer, AccountDetailSerializer, UserCreateSerializer
@@ -35,7 +36,7 @@ class AccountViewSet(mixins.CreateModelMixin,
             f"{new_account.user.username}! Please, check your email {new_account.user.email} and follow the link"
             "in the message we have send you to finish the registration."
         )
-        return Response(message, status=201)
+        return Response(message, status=HTTPStatus.CREATED)
 
     @action(methods=['get'], detail=False)
     def me(self, request):
@@ -54,7 +55,6 @@ class AccountViewSet(mixins.CreateModelMixin,
             user_serializer.is_valid(raise_exception=True)
             user_serializer.update(request.user, user_serializer.validated_data)
             data.pop('user')
-
         serializer = self.serializer_class(instance=request.user.account, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.update(request.user.account, serializer.validated_data)
@@ -64,6 +64,7 @@ class AccountViewSet(mixins.CreateModelMixin,
 class AccountDetailAPIView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = AccountDetailSerializer
+    queryset = Account.objects.all()
     lookup_url_kwarg = "username"
     lookup_field = "user__username"
 
@@ -71,7 +72,6 @@ class AccountDetailAPIView(generics.RetrieveAPIView):
 @api_view(['get'])
 def activate_user(request, uid: str, token: str):
     try:
-        print(User.objects.all().last().pk, decode_uid(uid))
         user = User.objects.get(pk=decode_uid(uid))
     except ():
         user = None
@@ -79,6 +79,6 @@ def activate_user(request, uid: str, token: str):
     if user is not None and check_activation_token(user=user, token=token):
         user.is_active = True
         user.save()
-        return Response("Registration is finished successfully.")
+        return Response("Registration is finished successfully.", status=HTTPStatus.OK)
     else:
-        return Response("Activation link is invalid.", status=400)
+        return Response("Activation link is invalid.", status=HTTPStatus.BAD_REQUEST)

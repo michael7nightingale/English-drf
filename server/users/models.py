@@ -1,13 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.conf import settings
-import logging
 
 from services.models import UUIDModel
 from chats.models import Chat
-
-
-logger = logging.getLogger(__name__)
 
 
 class CustomUserManager(UserManager):
@@ -49,12 +45,14 @@ class AccountManager(models.Manager):
             self,
             user: dict | None = None,
             level: str = "C2",
-            score: int = 6000,
+            score: int = 5000,
             location: str = "NewYork"
     ):
-        user = {"username": 'chat-gpt',
-                'password': 'chat-gpt-password',
-                "email": 'chat_gpt@mail.ru'} if user is None else user
+        user = {
+            "username": settings.CHATGPT_USERNAME,
+            'password': settings.CHATGPT_PASSWORD,
+            "email": settings.CHATGPT_EMAIL
+        } if user is None else user
 
         user = User.objects.create_user(**user)
         account = Account.objects.create(
@@ -66,14 +64,17 @@ class AccountManager(models.Manager):
         account.save()
         return account
 
+    def all(self):
+        return super().select_related("user").filter(user__is_active=True).all()
+
 
 SCORES = {
-    1000: "A1",
-    2000: "A2",
-    3000: "B1",
-    4000: "B2",
-    5000: "C1",
-    6000: "C2"
+    0: "A1",
+    1000: "A2",
+    2000: "B1",
+    3000: "B2",
+    4000: "C1",
+    5000: "C2"
 }
 
 
@@ -92,7 +93,6 @@ class Account(UUIDModel):
     avatar = models.ImageField("Avatar", upload_to='uploads/avatars/', null=True, blank=True)
     level = models.CharField("Уровень английского", max_length=100, default='A1')
     score = models.IntegerField("Очки английского", null=True, default=0, blank=True)
-    # need_exam = models.BooleanField(default=False)
 
     objects = AccountManager()
 
@@ -108,9 +108,14 @@ class Account(UUIDModel):
             pass    # some mistake
 
     def get_avatar_url(self):
-        if self.avatar is None:
-            return settings.MEDIA_URL + "/uploads/avatars/default.png"
-        return settings.MEDIA_URL + self.avatar.url
+        """Returns url to the user avatar."""
+        if not self.avatar:
+            return settings.MEDIA_URL + "uploads/avatars/default_avatar.jpg"
+        return self.avatar.url
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    class Meta:
+        verbose_name = "Аккаунт"
+        verbose_name_plural = "Аккаунты"

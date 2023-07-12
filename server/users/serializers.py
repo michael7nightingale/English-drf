@@ -34,7 +34,7 @@ class AccountDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ('username', 'first_name', 'last_name', "email"
+        fields = ("email", 'username', 'first_name', 'last_name',
                   'location', "get_avatar_url", "score", "level")
 
 
