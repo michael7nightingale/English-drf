@@ -1,16 +1,19 @@
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
+
+from asgiref.sync import sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
 
 from services.ai.messenger import Messenger
 from .models import Chat, Message
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
+class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
-        self.chat = Chat.objects.create(self.chat_id)
         self.account = self.scope['user'].account
+        self.chat = self.account.chat
+        self.chat_id = str(self.chat.id)
+
         # Join room group
         await self.channel_layer.group_add(
             self.chat_id, self.channel_name
@@ -25,8 +28,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     # Receive message from WebSocket
-    async def receive(self, json_data):
-        text_data = json.loads(json_data)
+    async def receive(self, text_data):
+        text_data = json.loads(text_data)
         text = text_data["text"]
 
         # Send message to room group
@@ -42,27 +45,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.generate_pupil_message()
         else:
             last_message_json = cache.get(self.account.id)
-            last_message = json.loads(last_message_json)
-            if last_message is None:
+            if last_message_json is None:
                 await self.answer_remark_message(text)
             else:
+                last_message = last_message_json
                 if last_message['type'] == 'pupil':
-                    await self.answer_pupil_message(text)
+                    await self.answer_pupil_message(text, last_message)
                 elif last_message['type'] == 'remark':
                     await self.answer_remark_message(text)
                 else:
                     await self.send(text_data=json.dumps({'text': "Unknown message type."}))
 
     async def generate_pupil_message(self):
-        new_message = Messenger.generate(self.chat)
+        new_message = await sync_to_async(Messenger.generate)(self.chat)
+        print(12312, new_message)
         cache.set(
             self.account.id,
             {"text": new_message.text, "type": new_message.type}
         )
         await self.send(text_data=json.dumps({'text': new_message.text}))
 
-    async def answer_pupil_message(self, text):
-        new_message = Message.objects.create(
+    async def answer_pupil_message(self, text, last_message):
+        new_message = await sync_to_async(Message.objects.create)(
             sender=self.account,
             chat=self.chat,
             text=text,
@@ -70,12 +74,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         await self.send(text_data=json.dumps({'text': new_message.text}))
 
-        pupil_answer_message = Messenger(new_message).chat()
+        pupil_answer_message = await sync_to_async(Messenger(new_message).chat)(last_message)
         await self.send(text_data=json.dumps({'text': pupil_answer_message.text}))
         cache.set(self.account.id, None)
 
     async def answer_remark_message(self, text):
-        new_message = Message.objects.create(
+        new_message = await sync_to_async(Message.objects.create)(
             sender=self.account,
             chat=self.chat,
             text=text,
@@ -83,7 +87,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         await self.send(text_data=json.dumps({'text': new_message.text}))
 
-        answer_message = Messenger(new_message).chat()
+        answer_message = await sync_to_async(Messenger(new_message).chat)()
         await self.send(text_data=json.dumps({'text': answer_message.text}))
 
     # async def send_remark_message(self, text):

@@ -9,7 +9,7 @@ class Chat(UUIDModel):
     objects = models.Manager()
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class BaseTextMessage(models.Model):

@@ -92,12 +92,12 @@ class Messenger(ChatGPT):
         super().__init__()
         self.message = message
 
-    def chat(self):
+    def chat(self, *args, **kwargs):
         match self.message.type:
             case "remark":
-                request_text = self.__reply_to_remark()
+                request_text = self.__reply_to_remark(*args, **kwargs)
             case "pupil":
-                request_text = self.__reply_to_pupil()
+                request_text = self.__reply_to_pupil(*args, **kwargs)
             case _:
                 raise ValueError("Incorrect type")
         response_text = self.get_response(request_text)
@@ -122,8 +122,7 @@ class Messenger(ChatGPT):
         """)
         return text.strip().replace('\n', ' ')
 
-    def __reply_to_pupil(self) -> str:
-        original_message = self.message.reply_to
+    def __reply_to_pupil(self, original_message) -> str:
         text = (
             f"""
                 Побудь моим учителем английского и редактором сообщения.
